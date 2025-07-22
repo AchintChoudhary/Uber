@@ -3,6 +3,30 @@ dotenv.config(); // Put 'At The Top' first to the environmental variable configu
 
 const express = require("express");
 const app = express();
+const mongoose =require('mongoose')
+const url = process.env.MONGO_URL; //CONNECT through URL
+const cors=require('cors')
+const userRoutes=require('./routes/user.routes')
+app.use(cors())
+app.use(express.json())  //This middleware automatically converts the JSON string into a JavaScript object
+
+
+app.use(express.urlencoded({extended:true})) //It converts the form data into a JavaScript object
+
+
+
+
+mongoose.connect(url)
+  .then(() => {
+    console.log('Successfully connected to MongoDB');
+    // Your code for successful connection
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+    // Your error handling code
+  });
+
+app.use('/users',userRoutes)
 
 app.get("/", (req, res) => {
   res.send("hello world");
