@@ -7,7 +7,7 @@ module.exports.createUser = async ({
   password,
 }) => {
   if (!firstname || !email || !password) {
-    throw new error("All fields are required");
+    throw new Error("All fields are required");
   }
 
   const user = userModel.create({
@@ -18,5 +18,6 @@ module.exports.createUser = async ({
     email,
     password,
   });
+//    When you use Model.create() in Mongoose, it implicitly calls save() behind the scenes
   return user;
 };

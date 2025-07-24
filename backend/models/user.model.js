@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase:true,
      minlength:[5,'Firstname must be  at least 5 characters long']
   },
   password: {
@@ -31,7 +32,7 @@ const userSchema = new mongoose.Schema({
 
 // Generates a JWT token for the user
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
+  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET,{expiresIn:'24h'});
   return token;
 };
 
