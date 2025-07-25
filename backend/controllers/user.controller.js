@@ -1,7 +1,7 @@
 const userModel = require("../models/user.model");
 const userService = require("../services/user.service");
 const { validationResult } = require("express-validator");
-const authMiddleware=require('../middlewares/auth.middleware')
+
 const blacklistTokenModel=require('../models/blacklistToken.model')
 
 module.exports.registerUser = async (req, res, next) => {
@@ -15,7 +15,7 @@ module.exports.registerUser = async (req, res, next) => {
 
 const isUserAlreadyExist=await userModel.findOne({email})
 
-if(!isUserAlreadyExist){
+if(isUserAlreadyExist){
     return res.status(400).json({message:'User already exist'})
 }
 
@@ -40,7 +40,7 @@ module.exports.loginUser = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-    return res.status(400).json({ error: errors.array() });
+    return res.status(400).json({ error: error.array() });
   }
 
   const { email, password } = req.body;
