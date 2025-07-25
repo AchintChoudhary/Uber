@@ -27,7 +27,7 @@ setEmail('')
 
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
-      <div>
+      <div>  
         {" "}
         <img
           className="w-16 mb-10"
