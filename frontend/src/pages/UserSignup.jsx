@@ -1,56 +1,78 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { UserDataContext } from "../context/UserContext";
 
 const UserSignup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [lastName, setLastName] = useState("");
-  const[firstName,setFirstName]=useState("")
-const [userData,setUserData]=useState({})
-const submitHandler=(e)=>{
+  const [firstName, setFirstName] = useState("");
 
-  e.preventDefault()
-setUserData({
-  email:email,
-  firstName:firstName,
-  lastName:lastName,
-  password:password
-})
-console.log(userData)
+  const navigate = useNavigate();
 
+  const { user, setUser } = useContext(UserDataContext);
 
-setFirstName('')
-setLastName('')
-setPassword('')
-setEmail('')
-}
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    
+    const newUser = {
+      fullname: {
+        firstname: firstName,
+        lastname: lastName,
+      },
+      email: email,
+      password: password,
+    };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/register`,
+      newUser
+    );
+
+    if (response.status == 201) {
+      const data = response.data;
+      setUser(data.user);           // Updates global user state
+       localStorage.setItem('token',data.token)
+      navigate("/home");
+    }
+
+    setFirstName("");
+    setLastName("");
+    setPassword("");
+    setEmail("");
+  };
 
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
-      <div>  
+      <div>
         {" "}
         <img
           className="w-16 mb-10"
           src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
         ></img>
-        <form onSubmit={(e)=>{
-          submitHandler(e)
-        }}>
+        <form
+          onSubmit={(e) => {
+            submitHandler(e);
+          }}
+        >
           <h3 className="text-base font-medium mb-2">What's your name ?</h3>
           <div className="flex gap-2 mb-6">
-            <input value={firstName}
-            onChange={(e)=>{
-              setFirstName(e.target.value)
-            }}
+            <input
+              value={firstName}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+              }}
               required
               className=" bg-[#eeeeee] w-1/2  px-4  py-2 rounded text-lg placeholder:text-base "
               type="text"
               placeholder="First name"
             ></input>
-            <input value={lastName}
-            onChange={(e)=>{
-              setLastName(e.target.value)
-            }}
+            <input
+              value={lastName}
+              onChange={(e) => {
+                setLastName(e.target.value);
+              }}
               required
               className=" bg-[#eeeeee] w-1/2  px-4  py-2 rounded  text-lg placeholder:text-base "
               type="text"
@@ -93,7 +115,9 @@ setEmail('')
       </div>
       <div>
         <p className="text-[10px] text-[#666666] leading-tight">
-          This site is protected by reCAPTCHA and the <span className="underline">Google and Privacy Policy</span> and <span className="underline">Terms of Service apply.</span>
+          This site is protected by reCAPTCHA and the{" "}
+          <span className="underline">Google and Privacy Policy</span> and{" "}
+          <span className="underline">Terms of Service apply.</span>
         </p>
       </div>
     </div>
