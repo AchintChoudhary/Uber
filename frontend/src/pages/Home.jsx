@@ -28,7 +28,7 @@ const Home = () => {
   const vehiclePanelRef = useRef(null); //This  is for vehicle
   const confirmRidePanelRef = useRef(null); //This is for confirmRide
   const vehicleFoundRef = useRef(null); //this is for looking for driver
- const waitingForDriverRef= useRef(null);
+ const waitingForDriverRef= useRef(null);  //this is for wating for driver 
 
 
 
