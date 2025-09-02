@@ -189,7 +189,7 @@ setVehicleCapacity('')
            </p>
          </div>
          <div>
-           <p className="text-[10px] text-[#666666] leading-tight">
+           <p className="text-[10px] text-[#666666] mt-2 leading-tight">
              This site is protected by reCAPTCHA and the <span className="underline">Google and Privacy Policy</span> and <span className="underline">Terms of Service apply.</span>
            </p>
          </div>

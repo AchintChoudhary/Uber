@@ -47,7 +47,7 @@ const ConfirmRide = (props) => {
         <button  onClick={()=>{
           props.setVehicleFound(true)
           props.setConfirmRidePanel(false)
-        }} className="w-full mt-3 cursor-pointer bg-green-600 text-white font-semibold p-2">
+        }} className="w-full mt-3 cursor-pointer bg-green-600 text-white font-semibold p-2 rounded-xl">
           Confirm Ride
         </button>
       </div>
