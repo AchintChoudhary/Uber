@@ -8,6 +8,7 @@ const url = process.env.MONGO_URL; //CONNECT through URL
 const cors=require('cors')
 const userRoutes=require('./routes/user.routes');
 const CaptainRoutes=require('./routes/captain.routes')
+const mapsRoutes=require('./routes/maps.routes')
 const cookieParser=require('cookie-parser')  //cookie-parser interect with cookies
 
 app.use(cors())
@@ -31,7 +32,7 @@ mongoose.connect(url)
 
 app.use('/users',userRoutes)
 app.use('/captains',CaptainRoutes)
-
+app.use('/maps',mapsRoutes)
 
 app.get("/", (req, res) => {
   res.send("hello world");
