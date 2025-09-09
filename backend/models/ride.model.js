@@ -42,6 +42,11 @@ orderId:{
 },
 signature:{
     type:String
+},
+otp:{
+  type:String,
+  select:false,
+  require:true
 }
 
 });

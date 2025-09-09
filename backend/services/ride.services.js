@@ -25,6 +25,18 @@ async function getFare(pickUp, destination) {
   return { fare, distanceTime };
 }
 
+module.exports={getFare,};
+
+async function getOtp(){
+return Math.floor(100000 + Math.random() * 900000).toString();
+
+}
+
+
+
+
+
+
 async function createRide({ user, pickup, destination, vehicleType }) {
   if (!user || !pickup || !destination || !vehicleType) {
     throw new Error('All fields are required');
@@ -37,6 +49,7 @@ async function createRide({ user, pickup, destination, vehicleType }) {
     pickUp: pickup,
     destination,
     fare: fare[vehicleType],
+    otp:await getOtp(),
     distance: distanceTime.distance.value,
     duration: distanceTime.duration.value
   });
@@ -45,5 +58,6 @@ async function createRide({ user, pickup, destination, vehicleType }) {
 }
 
 module.exports = {
-  createRide,
+  getFare,
+  createRide
 };

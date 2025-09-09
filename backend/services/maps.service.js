@@ -22,7 +22,7 @@ const getCoordinates = async (address) => {
     });
 
     console.log("OpenStreetMap Response count:", response.data.length);
-console.log(response)
+
     if (response.data && response.data.length > 0) {
       const result = response.data[0];
       console.log("Coordinates found:", result.lat, result.lon);
@@ -31,7 +31,6 @@ console.log(response)
         latitude: parseFloat(result.lat),
         longitude: parseFloat(result.lon),
         display_name: result.display_name,
-        
       };
     } else {
       throw new Error('Address not found in OpenStreetMap');
@@ -42,24 +41,32 @@ console.log(response)
   }
 };
 
-// Calculate distance using OSRM (Open Source Routing Machine)
-const getDistanceOSRM = async (originCoords, destinationCoords) => {
-  const url = "https://router.project-osrm.org/route/v1/driving/";
-  
+// Calculate distance using ORS (OpenRouteService)
+const getDistanceORS = async (originCoords, destinationCoords) => {
+  const url = "https://api.openrouteservice.org/v2/directions/driving-car";
+  const apiKey = process.env.ORS_API_KEY; // make sure your API key is set
+
   try {
-    const coordinates = `${originCoords.longitude},${originCoords.latitude};${destinationCoords.longitude},${destinationCoords.latitude}`;
-    
-    const response = await axios.get(`${url}${coordinates}`, {
-      params: {
-        overview: 'false',
-        geometries: 'geojson'
+    const response = await axios.post(
+      url,
+      {
+        coordinates: [
+          [originCoords.longitude, originCoords.latitude],
+          [destinationCoords.longitude, destinationCoords.latitude]
+        ]
       },
-      timeout: 10000
-    });
+      {
+        headers: {
+          Authorization: apiKey,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      }
+    );
 
     if (response.data.routes && response.data.routes.length > 0) {
-      const route = response.data.routes[0];
-      
+      const route = response.data.routes[0].summary;
+
       return {
         distance: {
           text: `${(route.distance / 1000).toFixed(2)} km`,
@@ -71,22 +78,19 @@ const getDistanceOSRM = async (originCoords, destinationCoords) => {
         }
       };
     } else {
-      throw new Error('No route found');
+      throw new Error("No route found");
     }
   } catch (error) {
-    console.error("OSRM Error:", error.message);
+    console.error("ORS Error:", error.response?.data || error.message);
     throw error;
   }
 };
-
-
 // Get distance between two addresses
 const getDistanceBetweenAddresses = async (originAddress, destinationAddress) => {
   try {
     console.log("Getting coordinates for:", originAddress, "and", destinationAddress);
     
     // Get coordinates for both addresses
-//This line is running two async requests in parallel and waiting for both to finish.
     const [originCoords, destinationCoords] = await Promise.all([
       getCoordinates(originAddress),
       getCoordinates(destinationAddress)
@@ -94,15 +98,14 @@ const getDistanceBetweenAddresses = async (originAddress, destinationAddress) =>
 
     console.log("Coordinates found:", originCoords, destinationCoords);
     
-    // Calculate distance using OSRM
-   const distanceData = await getDistanceOSRM(originCoords, destinationCoords);
-
+    // Calculate distance using ORS
+    const distanceData = await getDistanceORS(originCoords, destinationCoords);
 
     return {
-        origin: originCoords,
-  destination: destinationCoords,
-  distance: distanceData.distance,
-  duration: distanceData.duration
+      origin: originCoords,
+      destination: destinationCoords,
+      distance: distanceData.distance,
+      duration: distanceData.duration
     };
     
   } catch (error) {
@@ -111,36 +114,8 @@ const getDistanceBetweenAddresses = async (originAddress, destinationAddress) =>
   }
 };
 
-
-// const getAutoCompleteSuggestions=async(input)=>{
-// if(!input){
-//   throw new Error('Input is required');
-
-// }
-
-// const url="https://nominatim.openstreetmap.org/search";
-
-// try {
-//   const response = await axios.get(url) 
-//    if(response.data.status==='0K'){
-//     return response.data.predictions;
-//    }else{
-//     throw new Error('unable to fetch predictions')
-//    }
-//   }catch(error){
-//   console.error("OpenStreetMap Error:", error.message);
-//   throw error;
-// }
-// }
-
-
-
-
-
-
 module.exports = { 
   getCoordinates, 
   getDistanceBetweenAddresses,
-  getDistanceOSRM,
- 
+  getDistanceORS,
 };
