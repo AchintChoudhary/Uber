@@ -186,6 +186,7 @@ console.log(response.data)
         className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
       >
         <VehiclePanel
+       
         selectVehicle={setVehicleType}
           fare={fare}
           loadingFare={loadingFare}
