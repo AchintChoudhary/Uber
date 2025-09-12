@@ -1,78 +1,29 @@
-import React,{useState,createContext}from 'react'
+import React, { useState, createContext } from "react";
 
+// ✅ Create the context
+export const CaptainDataContext = createContext();
 
-
-// Provide a default value that matches your state structure
-export const CaptainDataContext = createContext({
-  captain: {
-    fullname: {
-      firstname: '',
-      lastname: '',
-    },
-    email: '',
-    vehicle: {
-      color: '',
-      plate: '',
-      capacity: '',
-      type: ''
-    }
-  },
-  setCaptain: () => {} // Provide a no-op function as default
-})
-
+// ✅ Create the provider
 const CaptainContext = ({ children }) => {
   const [captain, setCaptain] = useState({
     fullname: {
-      firstname: '',
-      lastname: '',
+      firstname: "",
+      lastname: "",
     },
-    email: '',
+    email: "",
     vehicle: {
-      color: '',
-      plate: '',
-      capacity: '',
-      type: ''
-    }
-  })
+      color: "",
+      plate: "",
+      capacity: "",
+      type: "",
+    },
+  });
 
   return (
     <CaptainDataContext.Provider value={{ captain, setCaptain }}>
       {children}
     </CaptainDataContext.Provider>
-  )
-}
+  );
+};
 
-export default CaptainContext
-
-
-
-
-
-
-
-
-// const CaptainContext = ({children}) => {
-//  const [captain, setCaptain] = useState({
-//     fullname:{
-//         firstname:'',
-//         lastname:'',
-//     },
-//     email:'',
-//    vehicle:{
-//     color:'',
-//     plate:'',
-//     capacity:'',
-//   type:''
-//   }
-// })
-
-//   return (
-    
-//         <CaptainDataContext.Provider value={{captain,setCaptain}}>
-//             {children}    {/* Makes captain & setCaptain available to all children */}
-//         </CaptainDataContext.Provider>
-  
-//   )
-// }
-
-// // export default CaptainContext
+export default CaptainContext;
