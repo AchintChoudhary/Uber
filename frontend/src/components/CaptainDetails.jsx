@@ -1,27 +1,14 @@
-import React, { useContext } from "react";
-import { CaptainDataContext } from "../context/CaptainContext";
+import React, { useContext } from 'react'
+import { CaptainDataContext } from '../context/CaptainContext' 
 
 const CaptainDetails = () => {
-  const context = useContext(CaptainDataContext);
-  const { captain, loading } = context;
+  const context = useContext(CaptainDataContext)
+  
+ 
+  
+  const { captain } = context
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2">Loading captain data...</span>
-      </div>
-    );
-  }
-
-  if (!captain) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        Failed to load captain data
-      </div>
-    );
-  }
-
+  console.log(captain)
   return (
     <>
       <div>
@@ -34,7 +21,7 @@ const CaptainDetails = () => {
             />
             <div>
               <h2 className="text-lg font-semibold">
-                {captain.fullname?.firstname || "Captain Name"}
+                {captain.fullname?.firstname || 'Captain Name'}
               </h2>
               <p className="text-gray-500 text-sm font-medium">Basic level</p>
             </div>
@@ -45,7 +32,6 @@ const CaptainDetails = () => {
           </div>
         </div>
       </div>
-
       <div className="flex gap-5 flex-col justify-between items-center">
         <div className="flex item-center gap-3 mt-5 p-3 border justify-center border-amber-300 bg-amber-300 rounded-xl">
           <div className="text-center">
@@ -66,7 +52,7 @@ const CaptainDetails = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default CaptainDetails;
+export default CaptainDetails
