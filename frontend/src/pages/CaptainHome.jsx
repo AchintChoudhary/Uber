@@ -7,10 +7,12 @@ import RidePopUp from "../components/RidePopUp";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
 import {SocketContext} from '../context/SocketContext'
 import { CaptainDataContext } from "../context/CaptainContext";
+import { set } from "mongoose";
 const CaptainHome = () => {
 
 const [ridePopUp, setRidePopUp] = useState(true)
 const [confirmRidePopUp,setConfirmRidePopUp]=useState(false)
+const [ride,setRide]=useState(null)
 
 const ridePopUpRef = useRef(null)
 const confirmRidePopUpRef = useRef(null)
@@ -45,7 +47,12 @@ const { socket } = useContext(SocketContext)
 
     })
 
+ socket.on('new-ride', (data) => {
 
+        setRide(data)
+        setRidePopUp(true)
+
+    })
 
 
 
