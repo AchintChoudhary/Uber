@@ -115,7 +115,7 @@ const getDistanceBetweenAddresses = async (originAddress, destinationAddress) =>
 };
 
 
-module.exports.getCaptainInTheRadius=async(ltd,length,radius)=>{
+const getCaptainInTheRadius=async(ltd,lng,radius)=>{
 const captains=await captainModel.find({
   location:{
     $geoWithin:{
@@ -124,8 +124,7 @@ const captains=await captainModel.find({
   }
 })
 
-
-
+return captains
 }
 
 
@@ -136,4 +135,5 @@ module.exports = {
   getCoordinates, 
   getDistanceBetweenAddresses,
   getDistanceORS,
+  getCaptainInTheRadius
 };
