@@ -22,7 +22,7 @@ const UserProtectWrapper = ({ children }) => {
     })
     .then(response => {
       if (response.status === 200) { 
-        setUser(response.data.user);                // Write the user's info on the global board.
+        setUser(response.data);                // Write the user's info on the global board.
         setIsLoading(false);               // Turn off the "Loading..." sign.
       }
     })

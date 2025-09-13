@@ -1,11 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState,useEffect,useContext } from "react";
 import { Link } from "react-router-dom";
 import { useGSAP } from "@gsap/react"; //for animation
 import gsap from "gsap";
 import CaptainDetails from "../components/CaptainDetails";
 import RidePopUp from "../components/RidePopUp";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
-
+import {SocketContext} from '../context/SocketContext'
+import { CaptainDataContext } from "../context/CaptainContext";
 const CaptainHome = () => {
 
 const [ridePopUp, setRidePopUp] = useState(true)
@@ -13,6 +14,42 @@ const [confirmRidePopUp,setConfirmRidePopUp]=useState(false)
 
 const ridePopUpRef = useRef(null)
 const confirmRidePopUpRef = useRef(null)
+
+
+const { socket } = useContext(SocketContext)
+    const { captain } = useContext(CaptainDataContext)
+
+    useEffect(() => {
+     
+        socket.emit("join", { userType: "captain", userId: captain._id })
+
+ const updateLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+
+                    socket.emit('update-location-captain', {
+                        userId: captain._id,
+                        location: {
+                            ltd: position.coords.latitude,
+                            lng: position.coords.longitude
+                        }
+                    })
+                })
+            }
+        }
+
+        const locationInterval = setInterval(updateLocation, 10000)
+        updateLocation()
+
+        // return () => clearInterval(locationInterval)
+
+    })
+
+
+
+
+
+
 
   useGSAP(() => {
     if (ridePopUp) {

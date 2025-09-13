@@ -1,6 +1,6 @@
 // backend/services/maps.service.js
 const axios = require('axios');
-
+const captainModel=require('../models/captain.model')
 // Get coordinates using OpenStreetMap Nominatim
 const getCoordinates = async (address) => {
   const url = "https://nominatim.openstreetmap.org/search";
@@ -113,6 +113,24 @@ const getDistanceBetweenAddresses = async (originAddress, destinationAddress) =>
     throw error;
   }
 };
+
+
+module.exports.getCaptainInTheRadius=async(ltd,length,radius)=>{
+const captains=await captainModel.find({
+  location:{
+    $geoWithin:{
+      $centerSphere:[[ltd,lng],radius/3963.2]
+    }
+  }
+})
+
+
+
+}
+
+
+
+
 
 module.exports = { 
   getCoordinates, 

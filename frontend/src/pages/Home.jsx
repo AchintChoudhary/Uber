@@ -1,14 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState,useContext,useEffect } from "react";
 import axios from "axios";
 import { useGSAP } from "@gsap/react"; // for animation
 import gsap from "gsap";
-
+import { SocketContext } from '../context/SocketContext';
 import "remixicon/fonts/remixicon.css"; // For icon
 import LocationPanel from "../components/LocationSearchPanel";
 import VehiclePanel from "../components/VehiclePanel";
 import ConfirmRide from "../components/ConfirmRide";
 import WaitForDriver from "../components/WaitForDriver";
 import LookingForDriver from "../components/LookingForDriver";
+import { UserDataContext } from '../context/UserContext';
 
 const Home = () => {
   const [pickup, setPickUp] = useState("");
@@ -27,6 +28,23 @@ const [vehicleType, setVehicleType] = useState(null)
   const confirmRidePanelRef = useRef(null); // This is for confirmRide
   const vehicleFoundRef = useRef(null); // this is for looking for driver
   const waitingForDriverRef = useRef(null); // this is for waiting for driver
+
+
+
+ const { socket } = useContext(SocketContext)
+    const { user } = useContext(UserDataContext)
+
+    useEffect(() => {
+     
+        socket.emit("join", { userType: "user", userId: user._id })
+    })
+
+
+
+
+
+
+
 
   const submitHandler = async (e) => {
     e.preventDefault();

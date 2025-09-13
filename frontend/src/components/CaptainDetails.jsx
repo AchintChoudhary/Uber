@@ -4,11 +4,17 @@ import { CaptainDataContext } from '../context/CaptainContext'
 const CaptainDetails = () => {
   const context = useContext(CaptainDataContext)
   
- 
+  // Add safety checks
+  if (!context || !context.captain) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <p className="text-gray-500">Loading captain details...</p>
+      </div>
+    );
+  }
   
-  const { captain } = context
+  const { captain } = context;
 
-  console.log(captain)
   return (
     <>
       <div>
@@ -20,8 +26,8 @@ const CaptainDetails = () => {
               className="w-15 h-15 rounded-full object-cover border"
             />
             <div>
-              <h2 className="text-lg font-semibold">
-                {captain.fullname?.firstname || 'Captain Name'}
+              <h2 className="text-lg font-semibold capitalize">
+                {captain.fullname?.firstname +' '+captain.fullname?.lastname}
               </h2>
               <p className="text-gray-500 text-sm font-medium">Basic level</p>
             </div>

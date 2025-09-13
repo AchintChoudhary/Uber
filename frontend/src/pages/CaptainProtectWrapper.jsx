@@ -22,8 +22,10 @@ const CaptainProtectWrapper = ({ children }) => {
     })
     .then(response => {
       if (response.status === 200) {
-        setCaptain(response.data.captain);
-        setIsLoading(false);
+
+         const captainData = response.data.captain || response.data;
+    setCaptain(captainData);
+    setIsLoading(false);
       }
     })
     .catch(err => {
