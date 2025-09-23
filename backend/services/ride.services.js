@@ -1,4 +1,5 @@
 const rideModel = require('../models/ride.model');
+const { sendMessageToSocketId } = require('../socket');
 const mapService = require('./maps.service');
 
 async function getFare(pickUp, destination) {
@@ -57,7 +58,74 @@ async function createRide({ user, pickup, destination, vehicleType }) {
   return ride;
 }
 
+
+ const confirmRide = async ({
+    rideId, captain
+}) => {
+    if (!rideId) {
+        throw new Error('Ride id is required');
+    }
+
+    await rideModel.findOneAndUpdate({
+        _id: rideId
+    }, {
+        status: 'accepted',
+        captain: captain._id
+    })
+
+    const ride = await rideModel.findOne({
+        _id: rideId
+    }).populate('user').populate('captain').select('+otp');
+
+    if (!ride) {
+        throw new Error('Ride not found');
+    }
+
+    return ride;
+
+}
+
+async function startRide({rideId,otp,captain}){
+    if(!rideId || !otp || !captain){
+        throw new Error('rideId, otp and captain are required')
+    }
+
+    const ride = await rideModel.findOne({
+        _id: rideId,
+       captain: captain._id
+    }).populate('user').populate('captain').select('+otp');
+
+if(!ride){
+    throw new Error('Ride not found');
+}
+
+if(ride.status!=='accepted'){
+    throw new Error('Ride not accepted');
+}
+
+    if (ride.otp !== otp) {
+        throw new Error('Invalid otp');
+    }
+
+    await rideModel.findOneAndUpdate({
+        _id: rideId
+    }, {
+        status: 'ongoing',
+       
+    });
+
+sendMessageToSocketId(ride.user.socketId,{
+    event:'ride-started',
+    data:ride
+})
+
+    return ride;
+}
+
+
 module.exports = {
   getFare,
-  createRide
+  createRide,
+  confirmRide,
+  startRide
 };

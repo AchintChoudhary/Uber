@@ -1,10 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import CaptainRiding from "../pages/CaptainRiding";
-import { Link } from "react-router-dom";
-const ConfirmRidePopUp = (props) => {
+import { useNavigate } from "react-router-dom"; 
+import axios from "axios";
 
-const submitHandler=(e)=>{
+
+
+
+const ConfirmRidePopUp = (props) => {
+const [otp, setOtp] = useState("")
+const navigate = useNavigate();
+
+const submitHandler=async(e)=>{
 e.preventDefault()
+ const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start-ride`, {
+            params: {
+                rideId: props.ride._id,
+                otp: otp
+            },
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+
+        if (response.status === 200) {
+            props.setConfirmRidePopup(false)
+            props.setRidePopupPanel(false)
+            navigate('/captain-riding', { state: { ride: props.ride } })
+        }
 }
 
 
@@ -27,7 +49,7 @@ e.preventDefault()
               className="w-18 h-18 rounded-full object-cover border"
             />
             <div>
-              <h2 className="text-lg font-semibold">SANTH</h2>
+              <h2 className="text-lg font-semibold capitalize">{props.ride?.user.fullname.firstname +" "+ props.ride?.user.fullname.lastname}</h2>
               <p className="text-gray-800 font-bold text-lg">KA15AK00-0</p>
             </div>
           </div>{" "}
@@ -42,7 +64,7 @@ e.preventDefault()
             <i className="  text-xl ri-map-pin-3-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600">{props.ride?.pickUp}</p>
             </div>
           </div>
 
@@ -50,30 +72,32 @@ e.preventDefault()
             <i className=" text-xl ri-square-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600">{props.ride?.destination}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-5 p-2  my-1 border-gray-200  ">
             <i className="  text-xl  ri-bank-card-2-fill"></i>
             <div>
-              <h3 className="text-xl font-semibold">₹ 193.30</h3>
+              <h3 className="text-xl font-semibold">₹ {props.ride?.fare}</h3>
               <p className=" text-sm  text-gray-600">Cash</p>
             </div>
           </div>
         </div>
         <div className="mt-4 w-full">
-         <form onSubmit={(e)=>{
-submitHandler(e)
-         }}>
-           <input type="text" className='bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3' placeholder='Enter OTP' />
-           <Link
-            onClick={() => {}}
-            to="/captain-riding"
+         <form onSubmit={
+submitHandler
+        }>
+           <input   value={otp}
+            onChange={(e) => setOtp(e.target.value)} type="text" className='bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3' placeholder='Enter OTP' />
+           <button
+          
+            type="submit"
+            
             className=" block text-center w-full mt-3 cursor-pointer bg-green-400 text-white font-semibold p-2 rounded-xl"
           >
             Confirm
-          </Link>
+          </button>
 
           <button
             onClick={() => {

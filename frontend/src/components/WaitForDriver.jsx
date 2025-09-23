@@ -20,10 +20,11 @@ props.setWaitingForDriverPanel(false)
           className="w-18 h-18 rounded-full object-cover border"
         />
         <div>
-          <h2 className="text-lg font-semibold">SANTH</h2>
-          <p className="text-gray-800 font-bold text-lg">KA15AK00-0</p>
+          <h2 className="text-lg font-semibold">{props.ride?.captain.fullname.firstname +" "+ props.ride?.captain.fullname.lastname}</h2>
+          <p className="text-gray-800 font-bold text-lg">{props.ride?.captain.vehicle.plate}</p>
           <p className="text-gray-500 text-sm">White Suzuki S-Presso LXI</p>
           <p className="text-yellow-500 font-medium">⭐ 4.9</p>
+           <p className="text-black font-medium">{props.ride?.otp}</p>
         </div>
       </div>
     
@@ -47,7 +48,7 @@ props.setWaitingForDriverPanel(false)
             <i className="  text-xl ri-map-pin-3-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600 capitalize">{props.ride?.pickUp}</p>
             </div>
           </div>
 
@@ -55,14 +56,14 @@ props.setWaitingForDriverPanel(false)
             <i className=" text-xl ri-square-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600 capitalize">{props.ride?.destination}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-5 p-2  my-1 border-gray-200  ">
             <i className="  text-xl  ri-bank-card-2-fill"></i>
             <div>
-              <h3 className="text-xl font-semibold">₹ 193.30</h3>
+              <h3 className="text-xl font-semibold">₹ {props.ride?.fare}</h3>
               <p className=" text-sm  text-gray-600">Cash</p>
             </div>
           </div>

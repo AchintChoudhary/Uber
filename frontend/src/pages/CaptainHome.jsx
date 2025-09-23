@@ -1,4 +1,5 @@
 import React, { useRef, useState,useEffect,useContext } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import { useGSAP } from "@gsap/react"; //for animation
 import gsap from "gsap";
@@ -10,7 +11,7 @@ import { CaptainDataContext } from "../context/CaptainContext";
 import { set } from "mongoose";
 const CaptainHome = () => {
 
-const [ridePopUp, setRidePopUp] = useState(true)
+const [ridePopUp, setRidePopUp] = useState(false)
 const [confirmRidePopUp,setConfirmRidePopUp]=useState(false)
 const [ride,setRide]=useState(null)
 
@@ -49,12 +50,20 @@ const { socket } = useContext(SocketContext)
 
  socket.on('new-ride', (data) => {
 console.log('New ride received:', data);
-      
-
+     setRide(data) 
+setRidePopUp(true)
     })
 
 
+const confirmRide=async()=>{
+await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`,{
+  rideId:ride._id,
+  captainId:captain._id
+},{ headers:{
+    Authorization:`Bearer ${localStorage.getItem('token')}`
+  }})
 
+}
 
 
   useGSAP(() => {
@@ -107,11 +116,16 @@ console.log('New ride received:', data);
 
 
  <div  ref={ridePopUpRef} className="fixed translate-y-full  w-full z-10 bottom-0 bg-white px-3 py-6 ">
-       <RidePopUp setRidePopUp={setRidePopUp} setConfirmRidePopUp={setConfirmRidePopUp} />
+       <RidePopUp setRidePopUp={setRidePopUp} ride={ride}
+        
+        confirmRide={confirmRide}
+        setConfirmRidePopUp={setConfirmRidePopUp} />
       </div>
 
        <div  ref={confirmRidePopUpRef} className="fixed translate-y-full h-screen w-full z-10 bottom-0 bg-white px-3 py-6 ">
-       <ConfirmRidePopUp setConfirmRidePopUp={setConfirmRidePopUp}  setRidePopUp={setRidePopUp} />
+       <ConfirmRidePopUp 
+       ride={ride}
+       setConfirmRidePopUp={setConfirmRidePopUp}  setRidePopUp={setRidePopUp} />
       </div>
 
 

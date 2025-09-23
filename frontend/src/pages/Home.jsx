@@ -10,6 +10,7 @@ import ConfirmRide from "../components/ConfirmRide";
 import WaitForDriver from "../components/WaitForDriver";
 import LookingForDriver from "../components/LookingForDriver";
 import { UserDataContext } from '../context/UserContext';
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [pickup, setPickUp] = useState("");
@@ -22,13 +23,14 @@ const Home = () => {
   const [fare, setFare] = useState({});
   const [loadingFare, setLoadingFare] = useState(false);
 const [vehicleType, setVehicleType] = useState(null)
+const [ride,setRide]=useState(null)
   const panelRef = useRef(null); // This is for locations
   const panelCloseRef = useRef(null); // This is down button
   const vehiclePanelRef = useRef(null); // This is for vehicle
   const confirmRidePanelRef = useRef(null); // This is for confirmRide
   const vehicleFoundRef = useRef(null); // this is for looking for driver
   const waitingForDriverRef = useRef(null); // this is for waiting for driver
-
+const navigate=useNavigate()
 
 
  const { socket } = useContext(SocketContext)
@@ -39,10 +41,17 @@ const [vehicleType, setVehicleType] = useState(null)
         socket.emit("join", { userType: "user", userId: user._id })
     })
 
+socket.on('ride-confirmed',ride=>{
+  setWaitingForDriverPanel(true)
+  setVehicleFound(false)
+  setRide(ride)
+})
 
 
-
-
+socket.on('ride-started',ride=>{
+  setWaitingForDriverPanel(false)
+navigate('/riding')
+});
 
 
 
@@ -226,6 +235,7 @@ console.log(response.data)
         fare={fare}
           setVehicleFound={setVehicleFound}
           setVehiclePanel={setVehiclePanel}
+        
           setConfirmRidePanel={setConfirmRidePanel}
         />
       </div>
@@ -249,7 +259,9 @@ console.log(response.data)
         ref={waitingForDriverRef}
         className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
       >
-        <WaitForDriver setWaitingForDriverPanel={setWaitingForDriverPanel} />
+        <WaitForDriver
+        ride={ride}
+        setWaitingForDriverPanel={setWaitingForDriverPanel} />
       </div>
     </div>
   );

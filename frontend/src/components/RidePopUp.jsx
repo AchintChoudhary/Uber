@@ -1,6 +1,11 @@
 import React from "react";
 
 const RidePopUp = (props) => {
+
+const meter=props.ride?.distance
+
+const km=meter/1000;
+
   return (
     <div>
       <h5
@@ -21,12 +26,12 @@ const RidePopUp = (props) => {
               className="w-18 h-18 rounded-full object-cover border"
             />
             <div>
-              <h2 className="text-lg font-semibold">SANTH</h2>
-              <p className="text-gray-800 font-bold text-lg">KA15AK00-0</p>
+              <h2 className="text-lg font-semibold capitalize">{props.ride?.user.fullname.firstname+" "+props.ride?.user.fullname.lastname}</h2>
+              
             </div>
           </div>{" "}
           <div>
-            <h1 className="text-sm font-bold">2.8 Km</h1>
+            <h1 className="text-sm font-bold">{km} Km</h1>
           </div>
         </div>
       </div>
@@ -36,7 +41,7 @@ const RidePopUp = (props) => {
             <i className="  text-xl ri-map-pin-3-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600 capitalize">{props.ride?.pickUp}</p>
             </div>
           </div>
 
@@ -44,14 +49,14 @@ const RidePopUp = (props) => {
             <i className=" text-xl ri-square-fill"></i>
             <div>
               <h3 className="text-xl font-semibold">562/11-A</h3>
-              <p className=" text-sm  text-gray-600">Kothi Kacheri, Mandvi</p>
+              <p className=" text-sm  text-gray-600 capitalize">{props.ride?.destination}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-5 p-2  my-1 border-gray-200  ">
             <i className="  text-xl  ri-bank-card-2-fill"></i>
             <div>
-              <h3 className="text-xl font-semibold">₹ 193.30</h3>
+              <h3 className="text-xl font-semibold">₹ {props.ride?.fare}</h3>
               <p className=" text-sm  text-gray-600">Cash</p>
             </div>
           </div>
@@ -60,6 +65,7 @@ const RidePopUp = (props) => {
           <button
           onClick={() => {
             props.setConfirmRidePopUp(true);
+            props.confirmRide()
           }}
           className="  cursor-pointer bg-green-400 text-white font-semibold p-3 px-4 rounded-xl"
         >
