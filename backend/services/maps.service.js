@@ -119,7 +119,7 @@ const getCaptainInTheRadius=async(ltd,lng,radius)=>{
 const captains=await captainModel.find({
   location:{
     $geoWithin:{
-      $centerSphere:[[ltd,lng],radius/3963.2]
+      $centerSphere:[[ltd,lng],radius/6371]
     }
   }
 })

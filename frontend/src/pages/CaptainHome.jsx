@@ -48,9 +48,8 @@ const { socket } = useContext(SocketContext)
     })
 
  socket.on('new-ride', (data) => {
-
-        setRide(data)
-        setRidePopUp(true)
+console.log('New ride received:', data);
+      
 
     })
 
