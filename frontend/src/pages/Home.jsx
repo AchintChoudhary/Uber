@@ -50,7 +50,7 @@ socket.on('ride-confirmed',ride=>{
 
 socket.on('ride-started',ride=>{
   setWaitingForDriverPanel(false)
-navigate('/riding')
+navigate('/riding',{state:{ride}})
 });
 
 

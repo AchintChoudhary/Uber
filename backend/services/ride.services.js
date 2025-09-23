@@ -85,47 +85,79 @@ async function createRide({ user, pickup, destination, vehicleType }) {
 
 }
 
-async function startRide({rideId,otp,captain}){
-    if(!rideId || !otp || !captain){
-        throw new Error('rideId, otp and captain are required')
+async function startRide({ rideId, otp, captain }) {
+  if (!rideId || !otp || !captain) {
+    throw new Error('rideId, otp and captain are required');
+  }
+
+  const ride = await rideModel.findOne({
+    _id: rideId,
+    captain: captain._id // ✅ Ensure the captain owns this ride
+  }).populate('user').populate('captain').select('+otp');
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  if (ride.status !== 'accepted') {
+    throw new Error('Ride not accepted');
+  }
+
+  if (ride.otp !== otp) {
+    throw new Error('Invalid otp');
+  }
+
+  await rideModel.findOneAndUpdate({
+    _id: rideId
+  }, {
+    status: 'ongoing',
+  });
+
+  sendMessageToSocketId(ride.user.socketId, {
+    event: 'ride-started',
+    data: ride
+  });
+
+  return ride;
+}
+
+async function endRide({ rideId, captain }){
+    if (!rideId) {
+        throw new Error('Ride id is required');
     }
 
     const ride = await rideModel.findOne({
         _id: rideId,
-       captain: captain._id
+        captain: captain._id
     }).populate('user').populate('captain').select('+otp');
 
-if(!ride){
-    throw new Error('Ride not found');
-}
+    if (!ride) {
+        throw new Error('Ride not found');
+    }
 
-if(ride.status!=='accepted'){
-    throw new Error('Ride not accepted');
-}
-
-    if (ride.otp !== otp) {
-        throw new Error('Invalid otp');
+    if (ride.status !== 'ongoing') {
+        throw new Error('Ride not ongoing');
     }
 
     await rideModel.findOneAndUpdate({
         _id: rideId
     }, {
-        status: 'ongoing',
-       
-    });
-
-sendMessageToSocketId(ride.user.socketId,{
-    event:'ride-started',
-    data:ride
-})
+        status: 'completed'
+    })
 
     return ride;
 }
+
+
+
+
+
 
 
 module.exports = {
   getFare,
   createRide,
   confirmRide,
-  startRide
+  startRide,
+  endRide
 };
