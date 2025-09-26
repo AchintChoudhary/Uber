@@ -8,7 +8,8 @@ import RidePopUp from "../components/RidePopUp";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
 import {SocketContext} from '../context/SocketContext'
 import { CaptainDataContext } from "../context/CaptainContext";
-import { set } from "mongoose";
+
+import LiveTracking from "../components/LiveTracking";
 const CaptainHome = () => {
 
 const [ridePopUp, setRidePopUp] = useState(false)
@@ -122,10 +123,7 @@ const confirmRide = async () => {
       </div>
 
       <div className="h-3/5">
-        <img
-          className="h-full w-full object-cover"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-        />
+       <LiveTracking/>
       </div>
       <div className="h-2/5 p-3">
        <CaptainDetails/>

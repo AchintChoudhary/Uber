@@ -1,15 +1,16 @@
-import React, { useRef, useState,useContext,useEffect } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import axios from "axios";
+import LiveTracking from "../components/LiveTracking";
 import { useGSAP } from "@gsap/react"; // for animation
 import gsap from "gsap";
-import { SocketContext } from '../context/SocketContext';
+import { SocketContext } from "../context/SocketContext";
 import "remixicon/fonts/remixicon.css"; // For icon
 import LocationPanel from "../components/LocationSearchPanel";
 import VehiclePanel from "../components/VehiclePanel";
 import ConfirmRide from "../components/ConfirmRide";
 import WaitForDriver from "../components/WaitForDriver";
 import LookingForDriver from "../components/LookingForDriver";
-import { UserDataContext } from '../context/UserContext';
+import { UserDataContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -22,38 +23,48 @@ const Home = () => {
   const [waitingForDriverPanel, setWaitingForDriverPanel] = useState(false);
   const [fare, setFare] = useState({});
   const [loadingFare, setLoadingFare] = useState(false);
-const [vehicleType, setVehicleType] = useState(null)
-const [ride,setRide]=useState(null)
-  const panelRef = useRef(null); // This is for locations
-  const panelCloseRef = useRef(null); // This is down button
-  const vehiclePanelRef = useRef(null); // This is for vehicle
-  const confirmRidePanelRef = useRef(null); // This is for confirmRide
-  const vehicleFoundRef = useRef(null); // this is for looking for driver
-  const waitingForDriverRef = useRef(null); // this is for waiting for driver
-const navigate=useNavigate()
+  const [vehicleType, setVehicleType] = useState(null);
+  const [ride, setRide] = useState(null);
 
+  const panelRef = useRef(null);
+  const panelCloseRef = useRef(null);
+  const vehiclePanelRef = useRef(null);
+  const confirmRidePanelRef = useRef(null);
+  const vehicleFoundRef = useRef(null);
+  const waitingForDriverRef = useRef(null);
+  const navigate = useNavigate();
 
- const { socket } = useContext(SocketContext)
-    const { user } = useContext(UserDataContext)
+  const { socket } = useContext(SocketContext);
+  const { user } = useContext(UserDataContext);
 
-    useEffect(() => {
-     
-        socket.emit("join", { userType: "user", userId: user._id })
-    })
+  useEffect(() => {
+    if (socket && user?._id) {
+      socket.emit("join", { userType: "user", userId: user._id });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, user]);
 
-socket.on('ride-confirmed',ride=>{
-  setWaitingForDriverPanel(true)
-  setVehicleFound(false)
-  setRide(ride)
-})
+  useEffect(() => {
+    if (!socket) return;
 
+    const onRideConfirmed = (rideData) => {
+      setWaitingForDriverPanel(true);
+      setVehicleFound(false);
+      setRide(rideData);
+    };
+    const onRideStarted = (rideData) => {
+      setWaitingForDriverPanel(false);
+      navigate("/riding", { state: { ride: rideData } });
+    };
 
-socket.on('ride-started',ride=>{
-  setWaitingForDriverPanel(false)
-navigate('/riding',{state:{ride}})
-});
+    socket.on("ride-confirmed", onRideConfirmed);
+    socket.on("ride-started", onRideStarted);
 
-
+    return () => {
+      socket.off("ride-confirmed", onRideConfirmed);
+      socket.off("ride-started", onRideStarted);
+    };
+  }, [socket, navigate]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -71,10 +82,7 @@ navigate('/riding',{state:{ride}})
           }
         );
 
-        console.log("Fare response:", response.data);
         setFare(response.data.fare);
-
-        // ✅ open panel only after fare is set
         setVehiclePanel(true);
         setPanelOpen(false);
       } catch (err) {
@@ -85,25 +93,29 @@ navigate('/riding',{state:{ride}})
     }
   };
 
-
-async function createRide(){
-const response=await  axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`,{
-    pickup,
-    destination,
-    vehicleType
-  },{ headers:{
-    Authorization:`Bearer ${localStorage.getItem('token')}`
+  async function createRide() {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/create`,
+        { pickup, destination, vehicleType },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log(response.data);
+      // After creating ride you may want to show the 'looking for driver' panel
+      setVehicleFound(true);
+      setVehiclePanel(false);
+      setConfirmRidePanel(false);
+    } catch (err) {
+      console.error("createRide error:", err);
+      alert("Could not create ride: " + (err.response?.data?.message || err.message));
+    }
   }
-}
 
-)
-console.log(response.data)
-}
-
-
-
-
-  // Animations for panels
+  // GSAP animations (unchanged)
   useGSAP(() => {
     if (panelOpen) {
       gsap.to(panelRef.current, { height: "70%" });
@@ -141,22 +153,22 @@ console.log(response.data)
   return (
     <div className="h-screen relative overflow-hidden">
       <img
-        className="absolute w-16 ml-8 mt-5"
+        className="absolute w-16 ml-8 mt-5 z-30 pointer-events-auto"
         src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
         alt="Logo"
       />
-      <div className="h-screen w-screen">
-        <img
-          className="object-cover h-full"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-          alt="Background"
-        />
+
+      {/* MAP: full-screen, but placed at z-0 so UI overlays are interactive */}
+      <div className="absolute inset-0 z-0">
+        <LiveTracking />
       </div>
 
-      {/* Bottom panels */}
-      <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
-        {/* Main input panel */}
-        <div className="h-[30%] p-5 bg-white relative">
+      {/* Panels container: it covers full screen but DOES NOT block pointer events,
+          except the children with pointer-events-auto will handle input.
+          This trick lets the map be interactive where there are no UI elements. */}
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-end">
+        {/* Main input panel (bottom portion) */}
+        <div className="h-[30%] p-5 bg-white relative z-20 pointer-events-auto">
           <h5
             ref={panelCloseRef}
             onClick={() => setPanelOpen(false)}
@@ -198,7 +210,7 @@ console.log(response.data)
           </form>
         </div>
 
-        <div ref={panelRef} className="bg-white h-0">
+        <div ref={panelRef} className="bg-white h-0 pointer-events-auto z-20">
           <LocationPanel
             setPanelOpen={setPanelOpen}
             setVehiclePanel={setVehiclePanel}
@@ -210,11 +222,10 @@ console.log(response.data)
       {/* Vehicle Panel */}
       <div
         ref={vehiclePanelRef}
-        className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
+        className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
         <VehiclePanel
-       
-        selectVehicle={setVehicleType}
+          selectVehicle={setVehicleType}
           fare={fare}
           loadingFare={loadingFare}
           setConfirmRidePanel={setConfirmRidePanel}
@@ -225,17 +236,16 @@ console.log(response.data)
       {/* Confirm Ride */}
       <div
         ref={confirmRidePanelRef}
-        className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
+        className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
         <ConfirmRide
-        createRide={createRide}
-        pickup={pickup}
-        destination={destination}
-        vehicleType={vehicleType}
-        fare={fare}
+          createRide={createRide}
+          pickup={pickup}
+          destination={destination}
+          vehicleType={vehicleType}
+          fare={fare}
           setVehicleFound={setVehicleFound}
           setVehiclePanel={setVehiclePanel}
-        
           setConfirmRidePanel={setConfirmRidePanel}
         />
       </div>
@@ -243,25 +253,24 @@ console.log(response.data)
       {/* Looking for Driver */}
       <div
         ref={vehicleFoundRef}
-        className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
+        className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
         <LookingForDriver
-         createRide={createRide}
-        pickup={pickup}
-        destination={destination}
-        vehicleType={vehicleType}
-        fare={fare}
-        setVehicleFound={setVehicleFound} />
+          createRide={createRide}
+          pickup={pickup}
+          destination={destination}
+          vehicleType={vehicleType}
+          fare={fare}
+          setVehicleFound={setVehicleFound}
+        />
       </div>
 
       {/* Waiting for Driver */}
       <div
         ref={waitingForDriverRef}
-        className="fixed translate-y-full w-full z-10 bottom-0 bg-white px-3 py-6"
+        className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
-        <WaitForDriver
-        ride={ride}
-        setWaitingForDriverPanel={setWaitingForDriverPanel} />
+        <WaitForDriver ride={ride} setWaitingForDriverPanel={setWaitingForDriverPanel} />
       </div>
     </div>
   );

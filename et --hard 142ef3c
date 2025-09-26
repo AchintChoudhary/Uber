@@ -1,0 +1,26 @@
+[33m21bb6fe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m frontend update
+[33m1a88b8f[m socket.io install
+[33m86e7dc2[m make ready for deploy
+[33m16578d6[m design issues
+[33m762a203[m live tracking not done
+[33m142ef3c[m all flow done except liveTracking
+[33m7c2131c[m otp implementation with problem
+[33m67fd4fe[m captain problem
+[33m1750c1b[m .
+[33m467a5e5[m captain in radius done, but with problem
+[33m49e53cd[m  port forwarding problem
+[33mceb63e9[m .
+[33mfc1ccd4[m captaindetail progress
+[33m771a421[m user create a ride done
+[33m1e17fe3[m user route partially done
+[33m2a769b7[m getfare done
+[33m1b3c03a[m google map not done
+[33m022fa46[m frontend Done
+[33m7baba45[m user page done
+[33m95cf70e[m user page done
+[33m46ad4ac[m login/sign
+[33mc8342db[m frontendLogin/signup
+[33m4591525[m captain_register_comp
+[33m954ca15[m .env change
+[33m5f7de7b[m user_register_done
+[33m76ee72c[m first commit
