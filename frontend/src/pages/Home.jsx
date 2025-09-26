@@ -1,10 +1,11 @@
+// frontend/src/pages/Home.jsx
 import React, { useRef, useState, useContext, useEffect } from "react";
 import axios from "axios";
-import LiveTracking from "../components/LiveTracking";
+import LiveTracking from "./components/LiveTracking";
 import { useGSAP } from "@gsap/react"; // for animation
 import gsap from "gsap";
 import { SocketContext } from "../context/SocketContext";
-import "remixicon/fonts/remixicon.css"; // For icon
+import "remixicon/fonts/remixicon.css";
 import LocationPanel from "../components/LocationSearchPanel";
 import VehiclePanel from "../components/VehiclePanel";
 import ConfirmRide from "../components/ConfirmRide";
@@ -23,7 +24,7 @@ const Home = () => {
   const [waitingForDriverPanel, setWaitingForDriverPanel] = useState(false);
   const [fare, setFare] = useState({});
   const [loadingFare, setLoadingFare] = useState(false);
-  const [vehicleType, setVehicleType] = useState(null);
+  const [vehicleType, setVehicleType] = useState(null); // will be 'motorcycle'|'car'|'auto'
   const [ride, setRide] = useState(null);
 
   const panelRef = useRef(null);
@@ -41,7 +42,6 @@ const Home = () => {
     if (socket && user?._id) {
       socket.emit("join", { userType: "user", userId: user._id });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, user]);
 
   useEffect(() => {
@@ -66,56 +66,77 @@ const Home = () => {
     };
   }, [socket, navigate]);
 
+  // Get fare
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (pickup.trim() === "" || destination.trim() === "") return;
 
-    if (pickup.trim() !== "" && destination.trim() !== "") {
-      try {
-        setLoadingFare(true);
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
-          {
-            params: { pickup, destination },
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+    try {
+      setLoadingFare(true);
+      // /rides/get-fare does not strictly require auth server-side in your code,
+      // but including the header is harmless and consistent.
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+        params: { pickup, destination },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
-        setFare(response.data.fare);
-        setVehiclePanel(true);
-        setPanelOpen(false);
-      } catch (err) {
-        console.error("Error fetching fare:", err);
-      } finally {
-        setLoadingFare(false);
-      }
+      setFare(response.data.fare || {});
+      setVehiclePanel(true);
+      setPanelOpen(false);
+    } catch (err) {
+      console.error("Error fetching fare:", err);
+      alert("Failed to fetch fare: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoadingFare(false);
     }
   };
 
+  // Create ride (protected)
   async function createRide() {
+    // Guard: must be logged in and must choose a vehicle
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to create a ride");
+      navigate("/login");
+      return;
+    }
+    if (!vehicleType) {
+      alert("Please choose a vehicle type");
+      setVehiclePanel(true);
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/create`,
         { pickup, destination, vehicleType },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(response.data);
-      // After creating ride you may want to show the 'looking for driver' panel
+
+      // backend returns created ride (or a confirmation)
+      console.log("Ride created:", response.data);
+
+      // show looking-for-driver panel
       setVehicleFound(true);
       setVehiclePanel(false);
       setConfirmRidePanel(false);
     } catch (err) {
       console.error("createRide error:", err);
       alert("Could not create ride: " + (err.response?.data?.message || err.message));
+      // If the server returns 401, force logout
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
     }
   }
 
-  // GSAP animations (unchanged)
+  // GSAP animations preserved (unchanged)
   useGSAP(() => {
     if (panelOpen) {
       gsap.to(panelRef.current, { height: "70%" });
@@ -158,95 +179,58 @@ const Home = () => {
         alt="Logo"
       />
 
-      {/* MAP: full-screen, but placed at z-0 so UI overlays are interactive */}
+      {/* MAP */}
       <div className="absolute inset-0 z-0">
         <LiveTracking />
       </div>
 
-      {/* Panels container: it covers full screen but DOES NOT block pointer events,
-          except the children with pointer-events-auto will handle input.
-          This trick lets the map be interactive where there are no UI elements. */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-end">
-        {/* Main input panel (bottom portion) */}
-        <div className="h-[30%] p-5 bg-white relative z-20 pointer-events-auto">
-          <h5
-            ref={panelCloseRef}
-            onClick={() => setPanelOpen(false)}
-            className="absolute text-3xl top-3 right-3 opacity-0 cursor-pointer"
-          >
-            <i className="ri-arrow-down-s-line"></i>
-          </h5>
-
-          <h4 className="text-2xl font-semibold">Find a trip</h4>
-          <form onSubmit={submitHandler}>
-            <div>
-              <div className="line bg-black absolute w-1 top-[37%] left-8 h-14"></div>
-            </div>
-
-            <input
-              className="bg-[#eee] px-12 py-2 text-base rounded-lg w-full my-2"
-              onClick={() => setPanelOpen(true)}
-              required
-              value={pickup}
-              onChange={(e) => setPickUp(e.target.value)}
-              type="text"
-              placeholder="Add a pick-up location"
-            />
-            <input
-              className="bg-[#eee] px-12 py-2 text-base rounded-lg w-full"
-              onClick={() => setPanelOpen(true)}
-              value={destination}
-              required
-              onChange={(e) => setDestination(e.target.value)}
-              type="text"
-              placeholder="Enter your destination"
-            />
-            <button
-              type="submit"
-              className="px-3 py-2 bg-black rounded-xl text-white font-bold mt-3 w-full"
-            >
-              Find Trip
-            </button>
-          </form>
-        </div>
-
-        <div ref={panelRef} className="bg-white h-0 pointer-events-auto z-20">
+      {/* Panels container */}
+      <div
+        ref={panelRef}
+        className="fixed bottom-0 z-20 pointer-events-none w-full"
+        style={{ height: 0 }}
+      >
+        {/* Location search panel */}
+        <div className="pointer-events-auto p-4 bg-white rounded-t-2xl shadow-xl">
           <LocationPanel
+            pickup={pickup}
+            destination={destination}
+            setPickUp={setPickUp}
+            setDestination={setDestination}
             setPanelOpen={setPanelOpen}
-            setVehiclePanel={setVehiclePanel}
+            submitHandler={submitHandler}
             loadingFare={loadingFare}
           />
         </div>
       </div>
 
-      {/* Vehicle Panel */}
+      {/* Vehicle selector */}
       <div
         ref={vehiclePanelRef}
         className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
         <VehiclePanel
-          selectVehicle={setVehicleType}
           fare={fare}
-          loadingFare={loadingFare}
-          setConfirmRidePanel={setConfirmRidePanel}
+          selectVehicle={(type) => setVehicleType(type)}
           setVehiclePanel={setVehiclePanel}
+          setConfirmRidePanel={setConfirmRidePanel}
+          vehicleType={vehicleType}
         />
       </div>
 
-      {/* Confirm Ride */}
+      {/* Confirm ride (summary & confirm) */}
       <div
         ref={confirmRidePanelRef}
         className="fixed translate-y-full w-full z-20 bottom-0 bg-white px-3 py-6 pointer-events-auto"
       >
         <ConfirmRide
-          createRide={createRide}
           pickup={pickup}
           destination={destination}
           vehicleType={vehicleType}
           fare={fare}
           setVehicleFound={setVehicleFound}
-          setVehiclePanel={setVehiclePanel}
           setConfirmRidePanel={setConfirmRidePanel}
+          createRide={createRide}
         />
       </div>
 
