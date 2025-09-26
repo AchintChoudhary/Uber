@@ -198,7 +198,7 @@ const Home = () => {
             setPickUp={setPickUp}
             setDestination={setDestination}
             setPanelOpen={setPanelOpen}
-            submitHandler={submitHandler}
+            submitHandler={submitHandler}   
             loadingFare={loadingFare}
           />
         </div>
